@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ResumeIQ Analyzer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">AI-powered resume intelligence</p>
+          <h1>ResumeIQ Analyzer</h1>
+          <p class="lede">
+            Upload or paste a resume and get an instant readiness score, keyword
+            coverage, tone checks, and focused improvement suggestions.
+          </p>
+          <div class="hero-actions">
+            <a class="primary-action" href="#analyzer">Analyze resume</a>
+            <a class="secondary-action" href="#insights">View insights</a>
+          </div>
+        </div>
+        <div class="score-orbit" aria-label="Resume score preview">
+          <div class="score-card glass">
+            <span class="score-label">Live ATS Score</span>
+            <strong>86</strong>
+            <span class="score-caption">Strong match potential</span>
+          </div>
+          <div class="mini-panel panel-skills">
+            <span>Skills</span>
+            <strong>24 found</strong>
+          </div>
+          <div class="mini-panel panel-tone">
+            <span>Tone</span>
+            <strong>Confident</strong>
+          </div>
+          <div class="mini-panel panel-impact">
+            <span>Impact</span>
+            <strong>High</strong>
+          </div>
+        </div>
+      </section>
+
+      <section id="analyzer" class="workspace">
+        <div class="input-panel glass">
+          <div class="section-heading">
+            <p class="eyebrow">Resume source</p>
+            <h2>Drop in your resume</h2>
+          </div>
+          <label class="upload-zone" for="resumeFile">
+            <input id="resumeFile" type="file" accept=".txt,.md,.pdf,.doc,.docx" />
+            <span class="upload-icon">+</span>
+            <span>
+              <strong>Upload resume file</strong>
+              <small>Text files are read instantly. Paste text below for PDFs or DOCX.</small>
+            </span>
+          </label>
+          <textarea
+            id="resumeText"
+            spellcheck="true"
+            placeholder="Paste resume text here..."
+          ></textarea>
+          <div class="controls">
+            <button id="analyzeBtn" class="primary-action" type="button">Analyze now</button>
+            <button id="sampleBtn" class="icon-button" type="button" title="Load sample resume">
+              Sample
+            </button>
+            <button id="clearBtn" class="icon-button" type="button" title="Clear resume text">
+              Clear
+            </button>
+          </div>
+        </div>
+
+        <div class="results-panel glass">
+          <div class="section-heading">
+            <p class="eyebrow">AI report</p>
+            <h2>Resume readiness</h2>
+          </div>
+          <div class="meter-wrap">
+            <div class="score-ring" style="--score: 0">
+              <span id="scoreValue">0</span>
+            </div>
+            <div>
+              <h3 id="scoreTitle">Ready when you are</h3>
+              <p id="scoreSummary">
+                Paste a resume to generate a targeted analysis of structure,
+                measurable impact, keyword density, and recruiter readability.
+              </p>
+            </div>
+          </div>
+          <div class="stat-grid">
+            <article>
+              <span>Keywords</span>
+              <strong id="keywordScore">0%</strong>
+            </article>
+            <article>
+              <span>Impact verbs</span>
+              <strong id="verbScore">0</strong>
+            </article>
+            <article>
+              <span>Metrics</span>
+              <strong id="metricScore">0</strong>
+            </article>
+          </div>
+          <div id="insights" class="insight-list" aria-live="polite"></div>
+        </div>
+      </section>
+
+      <section class="feature-band">
+        <div class="feature">
+          <span>01</span>
+          <h3>ATS keyword map</h3>
+          <p>Finds technical and role keywords recruiters expect to see.</p>
+        </div>
+        <div class="feature">
+          <span>02</span>
+          <h3>Impact signal</h3>
+          <p>Checks for numbers, outcomes, action verbs, and ownership language.</p>
+        </div>
+        <div class="feature">
+          <span>03</span>
+          <h3>Clarity review</h3>
+          <p>Flags sections that may feel too sparse, vague, or hard to scan.</p>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      const resumeText = document.querySelector("#resumeText");
+      const analyzeBtn = document.querySelector("#analyzeBtn");
+      const sampleBtn = document.querySelector("#sampleBtn");
+      const clearBtn = document.querySelector("#clearBtn");
+      const resumeFile = document.querySelector("#resumeFile");
+      const scoreRing = document.querySelector(".score-ring");
+      const scoreValue = document.querySelector("#scoreValue");
+      const scoreTitle = document.querySelector("#scoreTitle");
+      const scoreSummary = document.querySelector("#scoreSummary");
+      const keywordScore = document.querySelector("#keywordScore");
+      const verbScore = document.querySelector("#verbScore");
+      const metricScore = document.querySelector("#metricScore");
+      const insights = document.querySelector("#insights");
+      let scoreTimer;
+
+      const keywords = ["javascript", "typescript", "react", "node", "api", "cloud", "aws", "python", "sql", "analytics", "testing", "agile", "leadership", "design", "accessibility", "performance", "security", "data", "automation", "collaboration"];
+      const actionVerbs = ["built", "led", "launched", "improved", "reduced", "increased", "designed", "delivered", "optimized", "automated", "managed", "created", "owned", "scaled", "implemented"];
+      const sampleResume = `Frontend Developer
+
+Built React and TypeScript dashboards for a SaaS analytics platform used by 42,000 monthly users.
+Improved page load performance by 38% by optimizing bundle size, lazy loading routes, and removing unused dependencies.
+Designed accessible UI components with WCAG-minded color contrast, keyboard navigation, and responsive states.
+Collaborated with product, design, and backend teams to launch 9 customer-facing features across agile sprints.
+Implemented API integrations, testing coverage, and automated quality checks for production releases.
+
+Skills: React, TypeScript, JavaScript, Node, REST API, SQL, accessibility, performance, testing, design systems, analytics, collaboration.`;
+
+      function countMatches(text, words) {
+        return words.filter((word) => new RegExp(`\\b${word}\\b`, "i").test(text)).length;
+      }
+
+      function analyzeResume() {
+        const text = resumeText.value.trim();
+        if (!text) {
+          renderEmpty();
+          return;
+        }
+
+        const lower = text.toLowerCase();
+        const wordCount = text.split(/\s+/).filter(Boolean).length;
+        const keywordMatches = countMatches(lower, keywords);
+        const verbMatches = countMatches(lower, actionVerbs);
+        const metricMatches = (text.match(/\b\d+[%+]?\b|\$\d+|\b\d+x\b/gi) || []).length;
+        const hasSections = ["experience", "skills", "education", "projects"].filter((section) => lower.includes(section)).length;
+        const keywordPct = Math.round((keywordMatches / keywords.length) * 100);
+        const lengthScore = Math.min(20, Math.round((wordCount / 420) * 20));
+        const rawScore = keywordPct * 0.34 + Math.min(verbMatches, 12) * 3 + Math.min(metricMatches, 8) * 4 + hasSections * 5 + lengthScore;
+        const score = Math.min(100, Math.max(8, Math.round(rawScore)));
+
+        updateScore(score);
+        scoreTitle.textContent = score >= 82 ? "Excellent recruiter signal" : score >= 65 ? "Solid resume foundation" : "Needs sharper positioning";
+        scoreSummary.textContent =
+          score >= 82
+            ? "This resume has strong keyword coverage, measurable achievements, and clear impact language."
+            : score >= 65
+              ? "This resume is workable, with a few targeted edits needed to improve ATS and recruiter readability."
+              : "Add stronger achievements, role keywords, and clearer sections to make the resume easier to rank and scan.";
+        keywordScore.textContent = `${keywordPct}%`;
+        verbScore.textContent = String(verbMatches);
+        metricScore.textContent = String(metricMatches);
+        renderInsights({ keywordPct, keywordMatches, verbMatches, metricMatches, hasSections, wordCount });
+      }
+
+      function renderInsights(data) {
+        const notes = [
+          {
+            type: data.keywordPct >= 45 ? "strong" : "warning",
+            title: data.keywordPct >= 45 ? "Keyword coverage is healthy" : "Add more role keywords",
+            body: data.keywordPct >= 45 ? `Found ${data.keywordMatches} relevant skill and role terms. Keep the most important ones close to recent experience bullets.` : "Mirror the target job description with specific tools, frameworks, domains, and responsibilities you can honestly claim.",
+          },
+          {
+            type: data.metricMatches >= 4 ? "strong" : "warning",
+            title: data.metricMatches >= 4 ? "Impact is measurable" : "Quantify your wins",
+            body: data.metricMatches >= 4 ? "The resume includes concrete numbers, which helps recruiters understand scope and outcomes quickly." : "Add numbers for scale, speed, revenue, users, cost savings, quality, or time saved wherever possible.",
+          },
+          {
+            type: data.verbMatches >= 6 ? "strong" : "",
+            title: "Action language",
+            body: data.verbMatches >= 6 ? "Strong action verbs make your responsibilities feel owned and outcome-oriented." : "Start more bullets with verbs like built, led, optimized, launched, automated, or improved.",
+          },
+        ];
+
+        if (data.hasSections < 3) {
+          notes.push({
+            type: "warning",
+            title: "Section structure",
+            body: "Include clear headings for experience, skills, education, and projects so ATS systems and humans can scan faster.",
+          });
+        }
+
+        if (data.wordCount < 170) {
+          notes.push({
+            type: "warning",
+            title: "Resume depth",
+            body: "The content looks brief. Add enough recent accomplishments to show scope, complexity, and progression.",
+          });
+        }
+
+        insights.innerHTML = notes
+          .map((note) => `<article class="insight ${note.type}"><h4>${note.title}</h4><p>${note.body}</p></article>`)
+          .join("");
+      }
+
+      function updateScore(score) {
+        clearInterval(scoreTimer);
+        scoreRing.style.setProperty("--score", score);
+        let current = Number(scoreValue.textContent) || 0;
+        if (current === score) {
+          scoreValue.textContent = String(score);
+          return;
+        }
+
+        const step = current < score ? 1 : -1;
+        scoreTimer = setInterval(() => {
+          current += step;
+          scoreValue.textContent = String(current);
+          if (current === score) clearInterval(scoreTimer);
+        }, 10);
+      }
+
+      function renderEmpty() {
+        updateScore(0);
+        scoreTitle.textContent = "Ready when you are";
+        scoreSummary.textContent = "Paste a resume to generate a targeted analysis of structure, measurable impact, keyword density, and recruiter readability.";
+        keywordScore.textContent = "0%";
+        verbScore.textContent = "0";
+        metricScore.textContent = "0";
+        insights.innerHTML = "";
+      }
+
+      resumeFile.addEventListener("change", async (event) => {
+        const [file] = event.target.files;
+        if (!file) return;
+
+        if (file.type.startsWith("text") || /\.(txt|md)$/i.test(file.name)) {
+          resumeText.value = await file.text();
+          analyzeResume();
+        } else {
+          resumeText.placeholder = `File selected: ${file.name}. Browser-only demo cannot extract this format yet, so paste the resume text here.`;
+        }
+      });
+
+      analyzeBtn.addEventListener("click", analyzeResume);
+      sampleBtn.addEventListener("click", () => {
+        resumeText.value = sampleResume;
+        analyzeResume();
+      });
+      clearBtn.addEventListener("click", () => {
+        resumeText.value = "";
+        renderEmpty();
+      });
+    </script>
+  </body>
+</html>
